@@ -26,7 +26,20 @@ axios(url)
             const link = $(this).closest('a')
             if (!link.length) return
 
-            const title = $(this).text().trim()
+            // h3/h4 headline elements often nest a leading "kicker" div
+            // (section label, e.g. "Analysis" or a live-blog badge) alongside
+            // the actual headline text in a <span>. Taking $(this).text()
+            // on the whole element concatenates the kicker straight onto the
+            // headline with no separator (e.g. "AnalysisIran proves..."), so
+            // prefer the last non-empty <span> - that's consistently where
+            // the real headline text lives - falling back to the full
+            // element text if no such span exists.
+            const headlineSpans = $(this).find('span').filter(function () {
+                return $(this).text().trim().length > 0
+            })
+            const title = headlineSpans.length
+                ? $(headlineSpans[headlineSpans.length - 1]).text().trim()
+                : $(this).text().trim()
             let articleUrl = link.attr('href')
             if (!title || !articleUrl) return
 
